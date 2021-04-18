@@ -31,6 +31,20 @@ http://localhost:1994/migrateAllBuckets
 }
 ```
 
+http://localhost:1994/createNewReplication
+
+```json
+{
+    "sourceNodeAddress": "172.17.0.2",
+    "destinationNodeAddress": "172.17.0.3",
+    "referanceName": "test",
+    "bucket": "somebucket",
+    "loginName": "somelogin",
+    "loginSecret": "somepass"
+
+}
+```
+
 # How to contribute the project
 
 There is no rule for contributing. Please share your opinions or PRs...

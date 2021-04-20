@@ -6,6 +6,7 @@ It's an open source python development craft in order to handle huge amaounts of
 1. There is no need to think about which buckets are missing when doing XDCR migration
 2. There is no need for bucket configurations on source and destination. 
 3. If you are trying to migrate huge amount of Couchbase buckets this operation can be completed by simple curl requests for each cluster
+4. There is no need to think about indexes. These objects can also be migrated with the help of an endpoint
 
 # How to deploy this project
 
@@ -39,6 +40,18 @@ http://localhost:1994/createNewReplication
     "destinationNodeAddress": "172.17.0.3",
     "referanceName": "test",
     "bucket": "somebucket",
+    "loginName": "somelogin",
+    "loginSecret": "somepass"
+
+}
+```
+
+http://localhost:1994/migrateAllIndexes
+
+```json
+{
+    "sourceNodeAddress": "172.17.0.2",
+    "destinationNodeAddress": "172.17.0.3",
     "loginName": "somelogin",
     "loginSecret": "somepass"
 

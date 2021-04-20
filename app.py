@@ -111,6 +111,37 @@ def migrateBuckets():
     # Push message
     return finalStatusReport, 201
 
+@app.route('/migrateAllIndexes', methods=['POST'])
+def migrate_indexes():
+
+    replicationData = json.loads(request.data)
+
+    replicationModel = {
+        "sourceNodeAddress": replicationData['sourceNodeAddress'],
+        "destinationNodeAddress": replicationData['destinationNodeAddress'],
+        "loginName": replicationData['loginName'],
+        "loginSecret": replicationData['loginSecret']
+    }
+    results=xdcrManager.getCouchbaseIndexDefinitions(replicationData['sourceNodeAddress'],replicationData['loginName'],replicationData['loginSecret'])
+    migratedIndexes=[]
+    for result in results:
+        indexDefinition=result.get('definition')
+        replicaCount=result.get('numReplica')
+        indexBucket=result.get('bucket')
+        indexDefinition=indexDefinition.split('WITH')
+        defitionArrayLength=len(indexDefinition)
+        if defitionArrayLength>1:
+            indexDefinition.pop(1)
+        for definition in indexDefinition:
+            postFixOfIndex=' WITH {{"num_replica": {replicaCount} }}'.format(replicaCount=replicaCount)
+            fullIndexDefinition=definition+postFixOfIndex
+            migratedIndexes.append(fullIndexDefinition)
+            try:
+                xdcrManager.createIndexOnCouchbase(replicationData['destinationNodeAddress'],replicationData['loginName'],replicationData['loginSecret'],fullIndexDefinition)
+            except Exception as exceptionDetails:
+                return exceptionDetails,500
+    convertJsonToIndexList=json.dumps(migratedIndexes)
+    return convertJsonToIndexList,200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=1994)

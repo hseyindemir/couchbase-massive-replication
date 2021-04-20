@@ -1,4 +1,7 @@
 import requests
+from couchbase.cluster import Cluster, ClusterOptions
+from couchbase_core.cluster import PasswordAuthenticator
+from couchbase.cluster import QueryOptions
 def getAllBuckets(serverIp,loginName,loginSecret):
     try:
         urlForHealth = f"http://{serverIp}:8091/pools/default/buckets"
@@ -114,3 +117,18 @@ def createReplication(sourceIp, destinationIP, referanceName,bucketName,loginNam
            return replicationBucket.text
        except Exception as exceptionReis:
            return exceptionReis
+
+def getCouchbaseIndexDefinitions(serverIp,loginName,loginSecret):
+    try:
+        urlForHealth = f"http://{serverIp}:8091/indexStatus"
+        getNodeDetails = requests.get(
+            url=urlForHealth, auth=(loginName, loginSecret))
+        resultParsed = getNodeDetails.json()
+        return resultParsed.get('indexes')
+    except Exception as exceptionReis:
+        return "problem occured"
+
+def createIndexOnCouchbase(serverIp,loginName,loginSecret,indexDefinition):
+    cluster = Cluster('couchbase://{serverIp}'.format(serverIp=serverIp), ClusterOptions(
+    PasswordAuthenticator(loginName, loginSecret)))
+    query=cluster.query(indexDefinition).rows()
